@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>请求观测台 · 重试 / 退避 / 缓存降级</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <h1>请求观测台</h1>
+    <p>Fetch + AbortController + IndexedDB + Web Worker + Canvas，无框架。</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>发起请求</h2>
+      <form id="send-form">
+        <div class="row">
+          <label>方法
+            <select id="method">
+              <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option>
+            </select>
+          </label>
+          <label class="grow">URL
+            <input id="url" type="text" required value="http://localhost:8787/ok" />
+          </label>
+        </div>
+        <div class="row">
+          <label>重试次数
+            <input id="retries" type="number" min="0" max="10" value="3" />
+          </label>
+          <label>超时 (ms)
+            <input id="timeout" type="number" min="100" step="100" value="3000" />
+          </label>
+          <label>缓存 TTL (ms)
+            <input id="cache-ttl" type="number" min="0" step="1000" value="60000" />
+          </label>
+        </div>
+        <div class="row">
+          <label>退避策略
+            <select id="strategy">
+              <option value="exponential">指数退避</option>
+              <option value="linear">线性退避</option>
+              <option value="fixed">固定间隔</option>
+            </select>
+          </label>
+          <label>基础延迟 (ms)
+            <input id="base-delay" type="number" min="10" step="10" value="300" />
+          </label>
+          <label>延迟上限 (ms)
+            <input id="max-delay" type="number" min="100" step="100" value="5000" />
+          </label>
+          <label class="checkbox">
+            <input id="jitter" type="checkbox" checked /> 抖动 (full jitter)
+          </label>
+        </div>
+        <div class="row">
+          <label class="grow">请求体（非 GET/HEAD）
+            <textarea id="body" rows="2" placeholder='{"key":"value"}'></textarea>
+          </label>
+        </div>
+        <div class="row actions">
+          <button type="submit" class="primary">发送</button>
+          <button type="button" id="cancel-all">取消全部</button>
+          <button type="button" id="clear-history">清空历史与缓存</button>
+        </div>
+      </form>
+      <p class="hint">
+        试试 mock 端点：<code>/ok</code> <code>/flaky</code>（随机 500）<code>/slow?ms=5000</code>（配合超时）<code>/error</code>（500）<code>/notfound</code>（404）
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>请求时序</h2>
+      <canvas id="timeline"></canvas>
+      <div class="legend">
+        <span><i style="background:#2da44e"></i>成功</span>
+        <span><i style="background:#cf222e"></i>HTTP 错误</span>
+        <span><i style="background:#d4a72c"></i>超时</span>
+        <span><i style="background:#8250df"></i>网络错误</span>
+        <span><i style="background:#6e7781"></i>取消</span>
+        <span><i style="background:#bf8700;opacity:.4"></i>退避等待</span>
+        <span><i style="background:#0969da;opacity:.5"></i>进行中</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>请求记录</h2>
+      <div id="request-list"><p class="empty">暂无请求记录</p></div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
